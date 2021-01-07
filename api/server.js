@@ -7,8 +7,42 @@ const port = 3000;
 app.use(cors({ origin: true }));
 app.use(express.json());
 
-app.get('/', (req, res) => {
-  res.send('Hello World!');
+const {
+  getTopScorers,
+  getMostGamesPlayed,
+  getGamesForPlayer,
+  addGame,
+} = require('./dynamodb');
+
+app.get('/top_scorers', async (req, res) => {
+  const scorers = await getTopScorers();
+  res.json(scorers);
+});
+
+app.get('/most_games_played', async (req, res) => {
+  const gamesPlayed = await getMostGamesPlayed();
+  res.json(gamesPlayed);
+});
+
+app.get('/player/:playerName/games', async (req, res) => {
+  const { playerName } = req.params;
+  const games = await getGamesForPlayer(playerName);
+  res.json(games);
+});
+
+app.post('/player/:playerName/games', async (req, res) => {
+  const { playerName } = req.params;
+  const game = req.body;
+  if (!game.players.some((player) => player.name === playerName)) {
+    res.status(400);
+    res.json({ error: 'Player is not in the game' });
+  }
+  if (game.game_time < 0 || game.game_time > 1440) {
+    res.status(400);
+    res.json({ error: 'Game time must be between 0 and 1440 minutes' });
+  }
+  await addGame(game);
+  res.sendStatus(200);
 });
 
 if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'prod') {
