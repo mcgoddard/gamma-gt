@@ -12,6 +12,7 @@ const {
   getMostGamesPlayed,
   getGamesForPlayer,
   addGame,
+  getProfile,
 } = require('./dynamodb');
 
 app.get('/top_scorers', async (req, res) => {
@@ -28,6 +29,12 @@ app.get('/player/:playerName/games', async (req, res) => {
   const { playerName } = req.params;
   const games = await getGamesForPlayer(playerName);
   res.json(games);
+});
+
+app.get('/player/:playerName/profile', async (req, res) => {
+  const { playerName } = req.params;
+  const profile = await getProfile(playerName);
+  res.json(profile);
 });
 
 app.post('/player/:playerName/games', async (req, res) => {
