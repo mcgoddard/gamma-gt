@@ -1,0 +1,35 @@
+{
+  "name": "gt_gamma_web_app",
+  "version": "1.0.0",
+  "description": "The frontend of the gt-gamma service.",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/mcgoddard/gamma-gt.git"
+  },
+  "author": "Mike Goddard & Matt Raymond",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/mcgoddard/gamma-gt/issues"
+  },
+  "homepage": "https://github.com/mcgoddard/gamma-gt#readme",
+  "dependencies": {
+    "axios": "^0.21.1",
+    "react": "^17.0.1",
+    "react-dom": "^17.0.1",
+    "react-router-dom": "^5.2.0"
+  },
+  "devDependencies": {
+    "eslint": "^7.17.0",
+    "eslint-config-airbnb": "^18.2.1",
+    "eslint-plugin-import": "^2.22.1",
+    "eslint-plugin-jsx-a11y": "^6.4.1",
+    "eslint-plugin-react": "^7.22.0",
+    "eslint-plugin-react-hooks": "^4.2.0",
+    "jest": "^26.6.3",
+    "parcel": "^1.12.4"
+  }
+}
