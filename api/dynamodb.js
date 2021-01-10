@@ -80,6 +80,77 @@ const games = [
 // eslint-disable-next-line no-unused-vars
 const getGamesForPlayer = async (_playerName) => games;
 
+const profile = {
+  user: {
+    handle: 'The High Ground',
+    name: 'Matt Raymond',
+    joinDate: '2021-01-09',
+  },
+  games: [{
+    name: 'Seven Wonders',
+    players: [
+      {
+        name: 'TheHighGround',
+        winner: true,
+      },
+      {
+        name: 'MrsHermitCrab',
+        winner: false,
+      },
+    ],
+    game_time: 45,
+    time_played: new Date().toISOString(),
+  },
+  {
+    name: 'Seven Wonders',
+    players: [
+      {
+        name: 'TheHighGround',
+        winner: false,
+      },
+      {
+        name: 'HermitCrab',
+        winner: false,
+      },
+      {
+        name: 'Queez',
+        winner: true,
+      },
+    ],
+    game_time: 45,
+    time_played: new Date().toISOString(),
+  },
+  {
+    name: 'Between Two Cities',
+    players: [
+      {
+        name: 'TheHighGround',
+        winner: true,
+      },
+      {
+        name: 'MrsHermitCrab',
+        winner: true,
+      },
+      {
+        name: 'HermitCrab',
+        winner: false,
+      },
+      {
+        name: 'Queez',
+        winner: false,
+      },
+    ],
+    game_time: 45,
+    time_played: new Date().toISOString(),
+  }],
+
+};
+
+const getProfile = async (playerName) => {
+  console.log(playerName);
+  return profile;
+};
+
 const addGame = async (game) => games.push(game);
 
 module.exports = {
@@ -87,4 +158,5 @@ module.exports = {
   getMostGamesPlayed,
   getGamesForPlayer,
   addGame,
+  getProfile,
 };
