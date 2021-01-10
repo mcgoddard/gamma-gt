@@ -78,7 +78,6 @@ const games = [
 ];
 
 const getGamesForPlayer = async (playerName) => {
-  console.log(playerName);
   return games;
 };
 
