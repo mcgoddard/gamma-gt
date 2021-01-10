@@ -20,19 +20,19 @@ const getTopScorers = async () => [
 const getMostGamesPlayed = async () => [
   {
     name: 'The High Ground',
-    games_played: 10,
+    gamesPlayed: 10,
   },
   {
     name: 'HermitCrab',
-    games_played: 6,
+    gamesPlayed: 6,
   },
   {
     name: 'MrsHermitCrab',
-    games_played: 7,
+    gamesPlayed: 7,
   },
   {
     name: 'Queez',
-    games_played: 2,
+    gamesPlayed: 2,
   },
 ];
 
@@ -49,8 +49,8 @@ const games = [
         winner: false,
       },
     ],
-    game_time: 45,
-    time_played: new Date().toISOString(),
+    gameTime: 45,
+    timePlayed: new Date().toISOString(),
   },
   {
     name: 'Between Two Cities',
@@ -72,14 +72,13 @@ const games = [
         winner: false,
       },
     ],
-    game_time: 45,
-    time_played: new Date().toISOString(),
+    gameTime: 45,
+    timePlayed: new Date().toISOString(),
   },
 ];
 
-const getGamesForPlayer = async (playerName) => {
-  return games;
-};
+// eslint-disable-next-line no-unused-vars
+const getGamesForPlayer = async (_playerName) => games;
 
 const addGame = async (game) => games.push(game);
 
