@@ -81,7 +81,8 @@ const CreateGame = withRouter(({ history }) => {
           </label>
         </div>
         {players.map((player, index) => (
-          <div>
+          // eslint-disable-next-line react/no-array-index-key
+          <div key={index}>
             <input type="text" value={player.name} onChange={changePlayerName.bind(null, index)} />
             <input type="checkbox" value={player.winner} onChange={changePlayerWinner.bind(null, index)} />
             <input className="button" type="submit" onClick={removeRow.bind(null, index)} value="-" />
