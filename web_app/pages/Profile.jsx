@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
+import { useParams, Link } from 'react-router-dom';
 import { getGamesForPlayer } from '../utils/api';
 
 const Profile = () => {
@@ -16,7 +16,6 @@ const Profile = () => {
   return (
     <>
       <h1>{username}</h1>
-      <p>This is a users profile.</p>
       <h2>Games</h2>
       {loadedGames && (
       <table>
@@ -27,10 +26,11 @@ const Profile = () => {
           </tr>
         </thead>
         <tbody>
-          {games.map((game) => (
-            <tr>
+          {games.map((game, index) => (
+            // eslint-disable-next-line react/no-array-index-key
+            <tr key={index}>
               <td>{game.name}</td>
-              <td>{game.time_played}</td>
+              <td>{game.timePlayed}</td>
             </tr>
           ))}
         </tbody>
@@ -39,6 +39,9 @@ const Profile = () => {
       {!loadedGames && (
         <p>Loading</p>
       )}
+      <Link to="/create_game" className="button">
+        Add game
+      </Link>
     </>
   );
 };

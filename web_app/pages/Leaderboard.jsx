@@ -30,7 +30,7 @@ const Leaderboard = () => {
         </thead>
         <tbody>
           {topScorers.map((scorer) => (
-            <tr>
+            <tr key={scorer.name}>
               <td>
                 <Link to={`/profile/${scorer.name}`}>{scorer.name}</Link>
               </td>
@@ -54,11 +54,11 @@ const Leaderboard = () => {
         </thead>
         <tbody>
           {mostPlayed.map((player) => (
-            <tr>
+            <tr key={player.name}>
               <td>
                 <Link to={`/profile/${player.name}`}>{player.name}</Link>
               </td>
-              <td>{player.games_played}</td>
+              <td>{player.gamesPlayed}</td>
             </tr>
           ))}
         </tbody>

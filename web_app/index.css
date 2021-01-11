@@ -1,9 +1,58 @@
 body {
     background-color: antiquewhite;
     margin-top: 0px;
+    color: #39FF14;
+    background-color: #7851a9;
+    text-align: center;
+    margin: auto;
+    font-family: 'Open Sans', sans-serif;
 }
 
 .navbar {
-    background-color: beige;
+    background-color: #39FF14;
     text-align: right;
+    padding: 20px;
+}
+
+
+.button {
+    margin: 20px;
+    padding: 10px;
+    text-decoration: none;
+    background-color: #7851a9;
+    color: #39FF14;
+    border-radius: 10px;
+    border-color: #39FF14;
+    border-style: solid;
+    border-width: 2px;
+    margin: 10px;
+    font-family: 'Open Sans', sans-serif;
+}
+
+.navbar a {
+    margin: 10px;
+    padding: 10px;
+    text-decoration: none;
+    background-color: #39FF14;
+    color: #7851a9;
+    border-radius: 10px;
+    border-color: #7851a9;
+    border-style: solid;
+    border-width: 2px;
+}
+
+td a {
+    color: #39FF14;
+}
+
+table {
+    margin: 20px auto;
+}
+
+th {
+    padding: 10px;
+}
+
+td {
+    padding: 10px;
 }

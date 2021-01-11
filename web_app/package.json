@@ -4,6 +4,7 @@
   "description": "The frontend of the gt-gamma service.",
   "main": "index.js",
   "scripts": {
+    "start": "./node_modules/.bin/parcel serve index.html",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -20,6 +21,7 @@
     "axios": "^0.21.1",
     "react": "^17.0.1",
     "react-dom": "^17.0.1",
+    "react-router": "^5.2.0",
     "react-router-dom": "^5.2.0"
   },
   "devDependencies": {
