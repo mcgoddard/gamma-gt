@@ -1,0 +1,46 @@
+service: Gamma-GT
+
+frameworkVersion: '2'
+
+provider:
+  name: aws
+  runtime: nodejs12.x
+  region: eu-west-2
+  httpApi:
+    cors: true
+  environment:
+    NODE_ENV: prod
+
+functions:
+  gamma-gt-api:
+    handler: lambda.gamma_gt_api
+    memorySize: 128
+    events:
+      - httpApi:
+          path: /{any+}
+          method: '*'
+
+plugins:
+  - serverless-s3-sync
+  
+custom:
+  s3Sync:
+    - bucketName: gamma-gt.prod
+      localDir: ../web_app/dist
+      acl: public-read
+
+resources:
+  Resources:
+    SiteBucket:
+      Type: AWS::S3::Bucket
+      Properties:
+        BucketName: gamma-gt.prod
+        AccessControl: PublicRead
+        CorsConfiguration:
+          CorsRules:
+            - AllowedHeaders: ['*']
+              AllowedMethods: [GET]
+              AllowedOrigins: ['*']
+        WebsiteConfiguration:
+          IndexDocument: index.html
+          ErrorDocument: index.html
