@@ -21,10 +21,10 @@
   "dependencies": {
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "serverless-http": "^2.6.0"
+    "serverless-http": "^2.6.0",
+    "aws-sdk": "^2.827.0"
   },
   "devDependencies": {
-    "aws-sdk": "^2.827.0",
     "eslint": "^7.17.0",
     "eslint-config-airbnb-base": "^14.2.1",
     "eslint-plugin-import": "^2.22.1",

@@ -1,21 +1,26 @@
-const getTopScorers = async () => [
-  {
-    name: 'The High Ground',
-    score: 1234,
-  },
-  {
-    name: 'HermitCrab',
-    score: 1225,
-  },
-  {
-    name: 'MrsHermitCrab',
-    score: 1100,
-  },
-  {
-    name: 'Queez',
-    score: 10,
-  },
-];
+// Load the AWS SDK for Node.js
+const AWS = require('aws-sdk');
+// Set the region
+AWS.config.update({ region: 'eu-west-2' });
+
+// Create DynamoDB document client
+const docClient = new AWS.DynamoDB.DocumentClient({ apiVersion: '2012-08-10' });
+
+const getTopScorers = async () => {
+  const params = {
+    ExpressionAttributeValues: {
+      ':s': 'PLAYER',
+    },
+    KeyConditionExpression: 'sortKey = :s',
+    TableName: 'gamma-gt',
+    IndexName: 'HighScores',
+    ScanIndexForward: false,
+    Limit: 10,
+  };
+
+  const result = await docClient.query(params).promise();
+  return result.Items;
+};
 
 const getMostGamesPlayed = async () => [
   {
@@ -98,8 +103,8 @@ const profile = {
         winner: false,
       },
     ],
-    game_time: 45,
-    time_played: new Date().toISOString(),
+    gameTime: 45,
+    timePlayed: new Date().toISOString(),
   },
   {
     name: 'Seven Wonders',
@@ -117,8 +122,8 @@ const profile = {
         winner: true,
       },
     ],
-    game_time: 45,
-    time_played: new Date().toISOString(),
+    gameTime: 45,
+    timePlayed: new Date().toISOString(),
   },
   {
     name: 'Between Two Cities',
@@ -140,16 +145,13 @@ const profile = {
         winner: false,
       },
     ],
-    game_time: 45,
-    time_played: new Date().toISOString(),
+    gameTime: 45,
+    timePlayed: new Date().toISOString(),
   }],
 
 };
 
-const getProfile = async (playerName) => {
-  console.log(playerName);
-  return profile;
-};
+const getProfile = async (_playerName) => profile;
 
 const addGame = async (game) => games.push(game);
 

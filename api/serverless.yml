@@ -44,3 +44,39 @@ resources:
         WebsiteConfiguration:
           IndexDocument: index.html
           ErrorDocument: index.html
+    table:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: gamma-gt
+        AttributeDefinitions:
+          - AttributeName: playerName
+            AttributeType: S
+          - AttributeName: sortKey
+            AttributeType: S
+          - AttributeName: score
+            AttributeType: N
+          - AttributeName: gamesPlayed
+            AttributeType: N
+        KeySchema:
+          - AttributeName: playerName
+            KeyType: HASH
+          - AttributeName: sortKey
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+        GlobalSecondaryIndexes:
+          - IndexName: HighScores
+            Projection:
+              ProjectionType: ALL
+            KeySchema:
+            - AttributeName: sortKey
+              KeyType: HASH
+            - AttributeName: score
+              KeyType: RANGE
+          - IndexName: MostPlayed
+            Projection:
+              ProjectionType: ALL
+            KeySchema:
+            - AttributeName: sortKey
+              KeyType: HASH
+            - AttributeName: gamesPlayed
+              KeyType: RANGE

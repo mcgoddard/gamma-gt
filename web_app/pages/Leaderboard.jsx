@@ -30,9 +30,9 @@ const Leaderboard = () => {
         </thead>
         <tbody>
           {topScorers.map((scorer) => (
-            <tr key={scorer.name}>
+            <tr key={scorer.playerName}>
               <td>
-                <Link to={`/profile/${scorer.name}`}>{scorer.name}</Link>
+                <Link to={`/profile/${scorer.playerName}`}>{scorer.playerName}</Link>
               </td>
               <td>{scorer.score}</td>
             </tr>
