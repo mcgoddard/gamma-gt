@@ -1,9 +1,15 @@
-import React, { useState } from 'react';
+import React, { useState, useContext } from 'react';
 import { withRouter } from 'react-router';
 import { addGame } from '../utils/api';
+import UserContext from '../utils/UserContext';
 
 const CreateGame = withRouter(({ history }) => {
-  const [players, setPlayers] = useState([]);
+  const user = useContext(UserContext);
+  const [players, setPlayers] = useState([{
+    name: user.userName,
+    winner: false,
+    editable: false,
+  }]);
   const [name, setName] = useState('');
   const [gameTime, setGameTime] = useState(0);
   const [errors, setErrors] = useState([]);
@@ -14,7 +20,7 @@ const CreateGame = withRouter(({ history }) => {
       newErrors.push('You must have at least 2 players.');
     }
     if (gameTime <= 0 || gameTime > 1440) {
-      newErrors.push('Game time must be between.');
+      newErrors.push('Game time must be between 1 and 1440 minutes.');
     }
     if (name === '') {
       newErrors.push('You must provide a game name.');
@@ -25,12 +31,12 @@ const CreateGame = withRouter(({ history }) => {
     if (newErrors.length > 0) {
       setErrors(newErrors);
     } else {
-      await addGame('TheHighGround', {
+      await addGame(user.userName, {
         gameTime,
-        name,
+        gameName: name,
         players,
       });
-      history.push('/profile/TheHighGround');
+      history.push(`/profile/${user.userName}`);
     }
   };
   const changeGameTime = (event) => {
@@ -44,6 +50,7 @@ const CreateGame = withRouter(({ history }) => {
     const newPlayers = [...players, {
       name: '',
       winner: false,
+      editable: true,
     }];
     setPlayers(newPlayers);
   };
@@ -67,6 +74,11 @@ const CreateGame = withRouter(({ history }) => {
     <>
       <h1>Create a game</h1>
       <p>Fill out the form to add a game to the tracker.</p>
+      {errors && (
+        errors.map((e) => (
+          <p key={e}>{e}</p>
+        ))
+      )}
       <form action="#">
         <div>
           <label htmlFor="name">
@@ -83,9 +95,11 @@ const CreateGame = withRouter(({ history }) => {
         {players.map((player, index) => (
           // eslint-disable-next-line react/no-array-index-key
           <div key={index}>
-            <input type="text" value={player.name} onChange={changePlayerName.bind(null, index)} />
+            <input type="text" value={player.name} onChange={changePlayerName.bind(null, index)} readOnly={!player.editable} />
             <input type="checkbox" value={player.winner} onChange={changePlayerWinner.bind(null, index)} />
-            <input className="button" type="submit" onClick={removeRow.bind(null, index)} value="-" />
+            {player.editable && (
+              <input className="button" type="submit" onClick={removeRow.bind(null, index)} value="-" />
+            )}
           </div>
         ))}
         <input className="button" type="submit" onClick={addRow} value="+" />

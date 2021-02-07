@@ -10,6 +10,20 @@ provider:
     cors: true
   environment:
     NODE_ENV: prod
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+        - dynamodb:ConditionCheckItem
+      Resource: 
+        - 'arn:aws:dynamodb:eu-west-2:130979854346:table/gamma-gt'
+        - 'arn:aws:dynamodb:eu-west-2:130979854346:table/gamma-gt/*'
 
 functions:
   gamma-gt-api:
@@ -19,28 +33,32 @@ functions:
       - httpApi:
           path: /{any+}
           method: '*'
+      - httpApi:
+          path: /
+          method: '*'
 
 plugins:
   - serverless-s3-sync
   
 custom:
   s3Sync:
-    - bucketName: gamma-gt.prod
+    - bucketName: gamma-gt.mgoddard.net
       localDir: ../web_app/dist
       acl: public-read
+      deleteRemoved: true
 
 resources:
   Resources:
     SiteBucket:
       Type: AWS::S3::Bucket
       Properties:
-        BucketName: gamma-gt.prod
+        BucketName: gamma-gt.mgoddard.net
         AccessControl: PublicRead
         CorsConfiguration:
           CorsRules:
             - AllowedHeaders: ['*']
-              AllowedMethods: [GET]
-              AllowedOrigins: ['*']
+              AllowedMethods: [GET, POST]
+              AllowedOrigins: ['http://gamma-gt.mgoddard.net']
         WebsiteConfiguration:
           IndexDocument: index.html
           ErrorDocument: index.html

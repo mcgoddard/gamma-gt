@@ -1,6 +1,6 @@
 import Axios from 'axios';
 
-const BASE_URL = 'http://localhost:3000';
+const BASE_URL = process.env.BASE_URL || 'https://gamma-gt-api.mgoddard.net';
 
 export const getTopScorers = async () => {
   const scorers = await Axios.get(`${BASE_URL}/top_scorers`);
@@ -12,8 +12,8 @@ export const getMostGamesPlayed = async () => {
   return players.data;
 };
 
-export const getGamesForPlayer = async (username) => {
-  const games = await Axios.get(`${BASE_URL}/player/${username}/games`);
+export const getGamesForPlayer = async (userName) => {
+  const games = await Axios.get(`${BASE_URL}/player/${userName}/games`);
   if (games.status < 300) {
     return games.data;
   }
@@ -23,3 +23,10 @@ export const getGamesForPlayer = async (username) => {
 export const addGame = async (playerName, game) => {
   await Axios.post(`${BASE_URL}/player/${playerName}/games`, game);
 };
+
+export const getUserForEmail = async (email) => {
+  const result = await Axios.get(`${BASE_URL}/user?email=${email}`);
+  return result.data;
+};
+
+export const setUserForEmail = async (user) => (await Axios.post(`${BASE_URL}/user`, user).catch((error) => error.response)).data;

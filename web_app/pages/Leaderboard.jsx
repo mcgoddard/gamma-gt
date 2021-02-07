@@ -54,9 +54,9 @@ const Leaderboard = () => {
         </thead>
         <tbody>
           {mostPlayed.map((player) => (
-            <tr key={player.name}>
+            <tr key={player.playerName}>
               <td>
-                <Link to={`/profile/${player.name}`}>{player.name}</Link>
+                <Link to={`/profile/${player.playerName}`}>{player.playerName}</Link>
               </td>
               <td>{player.gamesPlayed}</td>
             </tr>

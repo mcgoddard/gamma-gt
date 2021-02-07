@@ -19,146 +19,171 @@ const getTopScorers = async () => {
   };
 
   const result = await docClient.query(params).promise();
-  return result.Items;
+  return result.Items.map((p) => {
+    const player = { ...p };
+    delete player.sortKey;
+    return player;
+  });
 };
 
-const getMostGamesPlayed = async () => [
-  {
-    name: 'The High Ground',
-    gamesPlayed: 10,
-  },
-  {
-    name: 'HermitCrab',
-    gamesPlayed: 6,
-  },
-  {
-    name: 'MrsHermitCrab',
-    gamesPlayed: 7,
-  },
-  {
-    name: 'Queez',
-    gamesPlayed: 2,
-  },
-];
+const getMostGamesPlayed = async () => {
+  const params = {
+    ExpressionAttributeValues: {
+      ':s': 'PLAYER',
+    },
+    KeyConditionExpression: 'sortKey = :s',
+    TableName: 'gamma-gt',
+    IndexName: 'MostPlayed',
+    ScanIndexForward: false,
+    Limit: 10,
+  };
 
-const games = [
-  {
-    name: 'Seven Wonders',
-    players: [
-      {
-        name: 'TheHighGround',
-        winner: true,
-      },
-      {
-        name: 'MrsHermitCrab',
-        winner: false,
-      },
-    ],
-    gameTime: 45,
-    timePlayed: new Date().toISOString(),
-  },
-  {
-    name: 'Between Two Cities',
-    players: [
-      {
-        name: 'TheHighGround',
-        winner: true,
-      },
-      {
-        name: 'MrsHermitCrab',
-        winner: true,
-      },
-      {
-        name: 'HermitCrab',
-        winner: false,
-      },
-      {
-        name: 'Queez',
-        winner: false,
-      },
-    ],
-    gameTime: 45,
-    timePlayed: new Date().toISOString(),
-  },
-];
-
-// eslint-disable-next-line no-unused-vars
-const getGamesForPlayer = async (_playerName) => games;
-
-const profile = {
-  user: {
-    handle: 'The High Ground',
-    name: 'Matt Raymond',
-    joinDate: '2021-01-09',
-  },
-  games: [{
-    name: 'Seven Wonders',
-    players: [
-      {
-        name: 'TheHighGround',
-        winner: true,
-      },
-      {
-        name: 'MrsHermitCrab',
-        winner: false,
-      },
-    ],
-    gameTime: 45,
-    timePlayed: new Date().toISOString(),
-  },
-  {
-    name: 'Seven Wonders',
-    players: [
-      {
-        name: 'TheHighGround',
-        winner: false,
-      },
-      {
-        name: 'HermitCrab',
-        winner: false,
-      },
-      {
-        name: 'Queez',
-        winner: true,
-      },
-    ],
-    gameTime: 45,
-    timePlayed: new Date().toISOString(),
-  },
-  {
-    name: 'Between Two Cities',
-    players: [
-      {
-        name: 'TheHighGround',
-        winner: true,
-      },
-      {
-        name: 'MrsHermitCrab',
-        winner: true,
-      },
-      {
-        name: 'HermitCrab',
-        winner: false,
-      },
-      {
-        name: 'Queez',
-        winner: false,
-      },
-    ],
-    gameTime: 45,
-    timePlayed: new Date().toISOString(),
-  }],
-
+  const result = await docClient.query(params).promise();
+  return result.Items.map((p) => {
+    const player = { ...p };
+    delete player.sortKey;
+    return player;
+  });
 };
 
-const getProfile = async (_playerName) => profile;
+const getGamesForPlayer = async (playerName) => {
+  const params = {
+    ExpressionAttributeValues: {
+      ':p': playerName,
+      ':sk': 'PLAYER',
+    },
+    KeyConditionExpression: 'playerName = :p and sortKey < :sk',
+    TableName: 'gamma-gt',
+    ScanIndexForward: false,
+  };
 
-const addGame = async (game) => games.push(game);
+  const result = await docClient.query(params).promise();
+  return result.Items.map((g) => {
+    const game = { ...g };
+    game.timePlayed = game.sortKey;
+    delete game.sortKey;
+    return game;
+  });
+};
+
+const getProfile = async (playerName) => {
+  const params = {
+    ExpressionAttributeValues: {
+      ':p': playerName,
+    },
+    KeyConditionExpression: 'playerName = :p and sortKey = \'PLAYER\'',
+    TableName: 'gamma-gt',
+    ScanIndexForward: false,
+  };
+
+  const result = await docClient.query(params).promise();
+  return result.Items.map((p) => {
+    const player = { ...p };
+    delete player.sortKey;
+    return player;
+  });
+};
+
+const addGame = async ({
+  gameName, gameTime, timePlayed, players,
+}) => {
+  if (players.length > 12) {
+    throw new Error('Maximum number of players in the game is 12');
+  }
+  const game = {
+    gameName, gameTime, players, sortKey: timePlayed,
+  };
+  const params = {
+    TransactItems: [
+      ...players.map((p) => ({
+        Put: {
+          TableName: 'gamma-gt',
+          Item: { playerName: p.name, ...game },
+        },
+      })),
+      ...players.map((p) => {
+        const updateScore = p.winner ? ', score = score + :gameTime, wins = wins + :one' : '';
+        const expressionAttributeValues = {
+          ':one': 1,
+        };
+        if (p.winner) {
+          expressionAttributeValues[':gameTime'] = gameTime;
+        }
+        return {
+          Update: {
+            TableName: 'gamma-gt',
+            Key: {
+              playerName: p.name,
+              sortKey: 'PLAYER',
+            },
+            UpdateExpression: `SET gamesPlayed = gamesPlayed + :one${updateScore}`,
+            ExpressionAttributeValues: expressionAttributeValues,
+          },
+        };
+      }),
+    ],
+  };
+  await docClient.transactWrite(params).promise();
+};
+
+const getUserForEmail = async (email) => {
+  const params = {
+    ExpressionAttributeValues: {
+      ':p': email,
+    },
+    KeyConditionExpression: 'playerName = :p',
+    TableName: 'gamma-gt',
+    ScanIndexForward: false,
+  };
+
+  const result = await docClient.query(params).promise();
+  if (result.Items && result.Items.length === 1) {
+    return result.Items.map((p) => {
+      const player = { ...p, userName: p.sortKey };
+      delete player.sortKey;
+      return player;
+    })[0];
+  }
+  return null;
+};
+
+const setUserForEmail = async ({ userName, email }) => {
+  await docClient.transactWrite({
+    TransactItems: [
+      {
+        Put: {
+          TableName: 'gamma-gt',
+          Item: {
+            playerName: email,
+            sortKey: userName,
+          },
+          ConditionExpression: 'attribute_not_exists(playerName)',
+        },
+      },
+      {
+        Put: {
+          TableName: 'gamma-gt',
+          Item: {
+            playerName: userName,
+            sortKey: 'PLAYER',
+            gamesPlayed: 0,
+            joinedAt: new Date().toISOString(),
+            score: 0,
+            wins: 0,
+          },
+          ConditionExpression: 'attribute_not_exists(playerName)',
+        },
+      },
+    ],
+  }).promise();
+};
 
 module.exports = {
   getTopScorers,
   getMostGamesPlayed,
   getGamesForPlayer,
-  addGame,
   getProfile,
+  addGame,
+  getUserForEmail,
+  setUserForEmail,
 };

@@ -6,5 +6,5 @@ import App from './App.jsx';
 render(<App />, document.querySelector('main'));
 
 if (module.hot) {
-    module.hot.accept();
+  module.hot.accept();
 }

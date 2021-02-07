@@ -4,7 +4,10 @@ const cors = require('cors');
 const app = express();
 const port = 3000;
 
-app.use(cors({ origin: true }));
+app.use(cors({
+  origin: '*',
+  optionsSuccessStatus: 200,
+}));
 app.use(express.json());
 
 const {
@@ -13,7 +16,14 @@ const {
   getGamesForPlayer,
   addGame,
   getProfile,
+  getUserForEmail,
+  setUserForEmail,
 } = require('./dynamodb');
+
+const validateEmail = (email) => {
+  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
+  return re.test(String(email).toLowerCase());
+};
 
 app.get('/top_scorers', async (req, res) => {
   const scorers = await getTopScorers();
@@ -46,13 +56,61 @@ app.post('/player/:playerName/games', async (req, res) => {
     res.json({ error: 'Player is not in the game' });
     return;
   }
-  if (game.gameTime < 0 || game.gameTime > 1440) {
+  const parsedTime = Number.parseInt(game.gameTime, 10);
+  if (Number.isNaN(parsedTime)) {
+    res.status(400);
+    res.json({ error: 'Game time must be a valid integer' });
+  }
+  if (parsedTime < 0 || parsedTime > 1440) {
     res.status(400);
     res.json({ error: 'Game time must be between 0 and 1440 minutes' });
     return;
   }
+  game.gameTime = parsedTime;
   await addGame(game);
   res.sendStatus(200);
+});
+
+app.get('/user', async (req, res) => {
+  const email = req.query.email || null;
+  if (!email) {
+    res.status(400);
+    res.json({ error: 'You must provide an email' });
+    return;
+  }
+  if (!validateEmail(email)) {
+    res.status(400);
+    res.json({ error: 'Please provide a valid email' });
+    return;
+  }
+  const userName = await getUserForEmail(email);
+  res.json(userName);
+});
+
+app.post('/user', async (req, res) => {
+  const user = req.body;
+  if (!user.userName) {
+    res.status(400);
+    res.json({ error: 'You must provide a username' });
+    return;
+  }
+  if (!user.email) {
+    res.status(400);
+    res.json({ error: 'You must provide an email adress' });
+    return;
+  }
+  if (!validateEmail(user.email)) {
+    res.status(400);
+    res.json({ error: 'Please provide a valid email' });
+    return;
+  }
+  try {
+    await setUserForEmail(user);
+    res.sendStatus(200);
+  } catch (err) {
+    res.status(400);
+    res.json({ error: 'Username is already taken' });
+  }
 });
 
 if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'prod') {
