@@ -41,7 +41,7 @@ const Leaderboard = () => {
       </table>
       )}
       {(topScorers.length === 0) && (
-        <p>Loading</p>
+        <p>Loading...</p>
       )}
       <h2>Most games played</h2>
       {(mostPlayed.length > 0) && (
@@ -65,7 +65,7 @@ const Leaderboard = () => {
       </table>
       )}
       {(mostPlayed.length === 0) && (
-        <p>Loading</p>
+        <p>Loading...</p>
       )}
     </>
   );

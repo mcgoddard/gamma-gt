@@ -43,7 +43,7 @@ const Profile = () => {
       </table>
       )}
       {!loadedGames && (
-        <p>Loading</p>
+        <p>Loading...</p>
       )}
       <Link to="/create_game" className="button">
         Add game
