@@ -8,17 +8,21 @@ import CreateGame from './pages/CreateGame';
 import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
+import SignIn from './pages/SignIn';
 import Navbar from './components/Navbar';
 import UserContext from './utils/UserContext';
 
 const App = () => {
   const [user, setUser] = useState(null);
   return (
-    <UserContext.Provider value={user}>
+    <UserContext.Provider value={[user, setUser]}>
       {!user && (
-        <Login setUser={setUser} />
+        <SignIn />
       )}
-      {user && (
+      {user && !user.userName && (
+        <Login />
+      )}
+      {user && user.userName && (
         <Router>
           <Navbar />
           <Switch>

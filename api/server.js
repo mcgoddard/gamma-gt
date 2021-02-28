@@ -48,6 +48,7 @@ app.get('/player/:playerName/profile', async (req, res) => {
 });
 
 app.post('/player/:playerName/games', async (req, res) => {
+  // TODO check JWT
   const { playerName } = req.params;
   const game = req.body;
   game.timePlayed = new Date().toISOString();
@@ -72,6 +73,7 @@ app.post('/player/:playerName/games', async (req, res) => {
 });
 
 app.get('/user', async (req, res) => {
+  // TODO check JWT
   const email = req.query.email || null;
   if (!email) {
     res.status(400);
@@ -83,17 +85,20 @@ app.get('/user', async (req, res) => {
     res.json({ error: 'Please provide a valid email' });
     return;
   }
+  // TODO check email matches JWT otherwise 403
   const userName = await getUserForEmail(email);
   res.json(userName);
 });
 
 app.post('/user', async (req, res) => {
+  // TODO check JWT
   const user = req.body;
   if (!user.userName) {
     res.status(400);
     res.json({ error: 'You must provide a username' });
     return;
   }
+  // TODO take email from JWT and remove from request body
   if (!user.email) {
     res.status(400);
     res.json({ error: 'You must provide an email adress' });

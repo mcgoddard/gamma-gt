@@ -4,7 +4,7 @@ import { addGame } from '../utils/api';
 import UserContext from '../utils/UserContext';
 
 const CreateGame = withRouter(({ history }) => {
-  const user = useContext(UserContext);
+  const [user] = useContext(UserContext);
   const [players, setPlayers] = useState([{
     name: user.userName,
     winner: false,
@@ -96,6 +96,7 @@ const CreateGame = withRouter(({ history }) => {
           // eslint-disable-next-line react/no-array-index-key
           <div key={index}>
             <input type="text" value={player.name} onChange={changePlayerName.bind(null, index)} readOnly={!player.editable} />
+            Win?
             <input type="checkbox" value={player.winner} onChange={changePlayerWinner.bind(null, index)} />
             {player.editable && (
               <input className="button" type="submit" onClick={removeRow.bind(null, index)} value="-" />
