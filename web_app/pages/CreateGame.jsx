@@ -1,10 +1,13 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import { withRouter } from 'react-router';
-import { addGame } from '../utils/api';
+import Autosuggest from 'react-autosuggest';
+import { addGame, getPlayerNames } from '../utils/api';
 import UserContext from '../utils/UserContext';
 
 const CreateGame = withRouter(({ history }) => {
   const [user] = useContext(UserContext);
+  const [playerNames, setPlayerNames] = useState([]);
+  const [suggestions, setSuggestions] = useState([]);
   const [players, setPlayers] = useState([{
     name: user.userName,
     winner: false,
@@ -13,6 +16,34 @@ const CreateGame = withRouter(({ history }) => {
   const [name, setName] = useState('');
   const [gameTime, setGameTime] = useState(0);
   const [errors, setErrors] = useState([]);
+  useEffect(() => {
+    const populatePlayers = async () => {
+      const retreivedNames = await getPlayerNames();
+      setPlayerNames(retreivedNames);
+    };
+    populatePlayers();
+  }, []);
+  const getSuggestions = (value) => {
+    const inputValue = value.trim().toLowerCase();
+    const inputLength = inputValue.length;
+
+    return inputLength === 0 ? [] : playerNames.filter(
+      (n) => n.toLowerCase().slice(0, inputLength) === inputValue,
+    );
+  };
+
+  const getSuggestionValue = (suggestion) => suggestion;
+
+  const renderSuggestion = (suggestion) => (<>{suggestion}</>);
+
+  const onSuggestionsFetchRequested = ({ value }) => {
+    setSuggestions(getSuggestions(value));
+  };
+
+  const onSuggestionsClearRequested = () => {
+    setSuggestions([]);
+  };
+
   const submit = async (event) => {
     event.preventDefault();
     const newErrors = [];
@@ -60,9 +91,9 @@ const CreateGame = withRouter(({ history }) => {
     newPlayers.splice(index, 1);
     setPlayers(newPlayers);
   };
-  const changePlayerName = (index, event) => {
+  const changePlayerName = (index, _event, info) => {
     const newPlayers = [...players];
-    newPlayers[index].name = event.target.value;
+    newPlayers[index].name = info.newValue;
     setPlayers(newPlayers);
   };
   const changePlayerWinner = (index, event) => {
@@ -97,17 +128,32 @@ const CreateGame = withRouter(({ history }) => {
             <input type="number" value={gameTime} onChange={changeGameTime} min="0" max="1440" />
           </label>
         </div>
-        {players.map((player, index) => (
-          // eslint-disable-next-line react/no-array-index-key
-          <div key={index}>
-            <input type="text" value={player.name} onChange={changePlayerName.bind(null, index)} readOnly={!player.editable} />
-            Win?
-            <input type="checkbox" value={player.winner} onChange={changePlayerWinner.bind(null, index)} />
-            {player.editable && (
-              <input className="button" type="submit" onClick={removeRow.bind(null, index)} value="-" />
-            )}
-          </div>
-        ))}
+        {players.map((player, index) => {
+          const inputProps = {
+            placeholder: 'Player name',
+            value: player.name,
+            onChange: changePlayerName.bind(null, index),
+            readOnly: !player.editable,
+          };
+          return (
+            // eslint-disable-next-line react/no-array-index-key
+            <div key={index}>
+              <Autosuggest
+                suggestions={suggestions}
+                onSuggestionsFetchRequested={onSuggestionsFetchRequested}
+                onSuggestionsClearRequested={onSuggestionsClearRequested}
+                getSuggestionValue={getSuggestionValue}
+                renderSuggestion={renderSuggestion}
+                inputProps={inputProps}
+              />
+              Win?
+              <input type="checkbox" value={player.winner} onChange={changePlayerWinner.bind(null, index)} />
+              {player.editable && (
+                <input className="button" type="submit" onClick={removeRow.bind(null, index)} value="-" />
+              )}
+            </div>
+          );
+        })}
         <input className="button" type="submit" onClick={addRow} value="+" />
         <input className="button" type="submit" onClick={submit} value="Submit" />
       </form>

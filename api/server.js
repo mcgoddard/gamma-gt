@@ -19,6 +19,7 @@ const {
   getProfile,
   getUserForEmail,
   setUserForEmail,
+  getPlayerNames,
 } = require('./dynamodb');
 
 app.get('/top_scorers', async (req, res) => {
@@ -41,6 +42,11 @@ app.get('/player/:playerName/profile', async (req, res) => {
   const { playerName } = req.params;
   const profile = await getProfile(playerName);
   res.json(profile);
+});
+
+app.get('/players', async (req, res) => {
+  const playerNames = await getPlayerNames();
+  res.json(playerNames);
 });
 
 app.post('/player/:playerName/games', async (req, res) => {

@@ -37,3 +37,8 @@ export const setUserForEmail = async (user, token) => {
   const response = await Axios.post(`${BASE_URL}/user`, user, getConfig(token)).catch((error) => error.response);
   return response.data;
 };
+
+export const getPlayerNames = async () => {
+  const response = await Axios.get(`${BASE_URL}/players`);
+  return response.data;
+}

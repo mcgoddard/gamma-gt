@@ -84,6 +84,21 @@ const getProfile = async (playerName) => {
   });
 };
 
+const getPlayerNames = async () => {
+  const params = {
+    ExpressionAttributeValues: {
+      ':s': 'PLAYER',
+    },
+    KeyConditionExpression: 'sortKey = :s',
+    TableName: 'gamma-gt',
+    IndexName: 'MostPlayed',
+    ScanIndexForward: false,
+  };
+
+  const result = await docClient.query(params).promise();
+  return result.Items.map((p) => p.playerName);
+};
+
 const addGame = async ({
   gameName, gameTime, timePlayed, players,
 }) => {
@@ -186,4 +201,5 @@ module.exports = {
   addGame,
   getUserForEmail,
   setUserForEmail,
+  getPlayerNames,
 };
