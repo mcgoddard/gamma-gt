@@ -74,6 +74,11 @@ const CreateGame = withRouter(({ history }) => {
     <>
       <h1>Create a game</h1>
       <p>Fill out the form to add a game to the tracker.</p>
+      <p>
+        Game time should be the play time listed on the box.
+        If a range is given average those times.
+        If no time is given take the average from Board Game Geek.
+      </p>
       {errors && (
         errors.map((e) => (
           <p key={e}>{e}</p>

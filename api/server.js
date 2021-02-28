@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { verifyEmail, googleAuth } = require('./auth');
 
 const app = express();
 const port = 3000;
@@ -48,8 +49,14 @@ app.get('/player/:playerName/profile', async (req, res) => {
 });
 
 app.post('/player/:playerName/games', async (req, res) => {
-  // TODO check JWT
+  const token = req.headers.authorization.replace(/^(Bearer )/, '');
+  const tokenEmail = await googleAuth(token);
+  const user = await getUserForEmail(tokenEmail);
   const { playerName } = req.params;
+  if (user.userName !== playerName) {
+    res.status(403);
+    return;
+  }
   const game = req.body;
   game.timePlayed = new Date().toISOString();
   if (!game.players.some((player) => player.name === playerName)) {
@@ -73,8 +80,12 @@ app.post('/player/:playerName/games', async (req, res) => {
 });
 
 app.get('/user', async (req, res) => {
-  // TODO check JWT
   const email = req.query.email || null;
+  const token = req.headers.authorization.replace(/^(Bearer )/, '');
+  if (!verifyEmail(email, token)) {
+    res.status(403);
+    return;
+  }
   if (!email) {
     res.status(400);
     res.json({ error: 'You must provide an email' });
@@ -85,20 +96,22 @@ app.get('/user', async (req, res) => {
     res.json({ error: 'Please provide a valid email' });
     return;
   }
-  // TODO check email matches JWT otherwise 403
   const userName = await getUserForEmail(email);
   res.json(userName);
 });
 
 app.post('/user', async (req, res) => {
-  // TODO check JWT
   const user = req.body;
+  const token = req.headers.authorization.replace(/^(Bearer )/, '');
+  if (!verifyEmail(user.email, token)) {
+    res.status(403);
+    return;
+  }
   if (!user.userName) {
     res.status(400);
     res.json({ error: 'You must provide a username' });
     return;
   }
-  // TODO take email from JWT and remove from request body
   if (!user.email) {
     res.status(400);
     res.json({ error: 'You must provide an email adress' });

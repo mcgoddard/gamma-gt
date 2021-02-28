@@ -6,14 +6,19 @@ import SignOut from './SignOut';
 const Navbar = () => {
   const user = useContext(UserContext)[0];
   return (
-    <div className="navbar">
-      <Link to="/">
-        Leaderboard
-      </Link>
-      <Link to={`/profile/${user.userName}`}>
-        My Profile
-      </Link>
-      <SignOut />
+    <div id="navbar">
+      <div id="navbar-title">
+        <h1>Gamma Game-Tracker</h1>
+      </div>
+      <div id="navbar-buttons">
+        <Link to="/">
+          Leaderboard
+        </Link>
+        <Link to={`/profile/${user.userName}`}>
+          My Profile
+        </Link>
+        <SignOut />
+      </div>
     </div>
   );
 };

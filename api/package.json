@@ -19,10 +19,11 @@
   },
   "homepage": "https://github.com/mcgoddard/gamma-gt#readme",
   "dependencies": {
+    "aws-sdk": "^2.827.0",
     "cors": "^2.8.5",
     "express": "^4.17.1",
-    "serverless-http": "^2.6.0",
-    "aws-sdk": "^2.827.0"
+    "google-auth-library": "^7.0.2",
+    "serverless-http": "^2.6.0"
   },
   "devDependencies": {
     "eslint": "^7.17.0",

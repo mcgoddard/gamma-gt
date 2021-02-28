@@ -12,7 +12,7 @@ const Profile = () => {
     setUserName(event.target.value);
   };
 
-  getUserForEmail(user.email).then((result) => {
+  getUserForEmail(user.email, user.token).then((result) => {
     if (result && result.userName) {
       setUser({
         ...user,
@@ -26,7 +26,7 @@ const Profile = () => {
   const confirm = async (event) => {
     event.preventDefault();
     if (stage === 'userName') {
-      setUserForEmail({ email: user.email, userName }).then((result) => {
+      setUserForEmail({ email: user.email, userName }, user.token).then((result) => {
         if (result && result.error) {
           setError(result.error);
           setStage('userName');
