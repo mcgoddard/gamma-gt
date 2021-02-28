@@ -15,16 +15,16 @@ import UserContext from './utils/UserContext';
 const App = () => {
   const [user, setUser] = useState(null);
   return (
-    <UserContext.Provider value={[user, setUser]}>
-      {!user && (
-        <SignIn />
-      )}
-      {user && !user.userName && (
-        <Login />
-      )}
-      {user && user.userName && (
-        <Router>
-          <Navbar />
+    <Router>
+      <UserContext.Provider value={[user, setUser]}>
+        <Navbar />
+        {!user && (
+          <SignIn />
+        )}
+        {user && !user.userName && (
+          <Login />
+        )}
+        {user && user.userName && (
           <Switch>
             <Route path="/profile/:userName">
               <Profile />
@@ -36,9 +36,9 @@ const App = () => {
               <Leaderboard />
             </Route>
           </Switch>
-        </Router>
-      )}
-    </UserContext.Provider>
+        )}
+      </UserContext.Provider>
+    </Router>
   );
 };
 

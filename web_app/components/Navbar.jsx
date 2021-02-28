@@ -10,15 +10,17 @@ const Navbar = () => {
       <div id="navbar-title">
         <h1>Gamma Game-Tracker</h1>
       </div>
-      <div id="navbar-buttons">
-        <Link to="/">
-          Leaderboard
-        </Link>
-        <Link to={`/profile/${user.userName}`}>
-          My Profile
-        </Link>
-        <SignOut />
-      </div>
+      { user && (
+        <div id="navbar-buttons">
+          <Link to="/">
+            Leaderboard
+          </Link>
+          <Link to={`/profile/${user.userName}`}>
+            My Profile
+          </Link>
+          <SignOut />
+        </div>
+      )}
     </div>
   );
 };
