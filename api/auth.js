@@ -14,8 +14,13 @@ const googleAuth = async (token) => {
 };
 
 const verifyEmail = async (email, token) => {
-  const tokenEmail = await googleAuth(token);
-  return email === tokenEmail;
+  try {
+    const tokenEmail = await googleAuth(token);
+    return email === tokenEmail;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
 };
 
 module.exports = {

@@ -35,7 +35,7 @@ const CreateGame = withRouter(({ history }) => {
         gameTime,
         gameName: name,
         players,
-      });
+      }, user.token);
       history.push(`/profile/${user.userName}`);
     }
   };

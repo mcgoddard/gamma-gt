@@ -21,11 +21,6 @@ const {
   setUserForEmail,
 } = require('./dynamodb');
 
-const validateEmail = (email) => {
-  const re = /^(([^<>()[\]\\.,;:\s@"]+(\.[^<>()[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-  return re.test(String(email).toLowerCase());
-};
-
 app.get('/top_scorers', async (req, res) => {
   const scorers = await getTopScorers();
   res.json(scorers);
@@ -49,12 +44,21 @@ app.get('/player/:playerName/profile', async (req, res) => {
 });
 
 app.post('/player/:playerName/games', async (req, res) => {
-  const token = req.headers.authorization.replace(/^(Bearer )/, '');
-  const tokenEmail = await googleAuth(token);
+  const token = (req.headers.authorization || '').replace(/^(Bearer )/, '');
+  let tokenEmail = '';
+  try {
+    tokenEmail = await googleAuth(token);
+  } catch (error) {
+    console.log(error);
+    res.status(403);
+    res.json({ error: 'Invalid token for request' });
+    return;
+  }
   const user = await getUserForEmail(tokenEmail);
   const { playerName } = req.params;
   if (user.userName !== playerName) {
     res.status(403);
+    res.json({ error: 'Invalid token for request' });
     return;
   }
   const game = req.body;
@@ -81,19 +85,16 @@ app.post('/player/:playerName/games', async (req, res) => {
 
 app.get('/user', async (req, res) => {
   const email = req.query.email || null;
-  const token = req.headers.authorization.replace(/^(Bearer )/, '');
-  if (!verifyEmail(email, token)) {
+  const token = (req.headers.authorization || '').replace(/^(Bearer )/, '');
+  const emailVerified = await verifyEmail(email, token);
+  if (!emailVerified) {
     res.status(403);
+    res.json({ error: 'Invalid token for request' });
     return;
   }
   if (!email) {
     res.status(400);
     res.json({ error: 'You must provide an email' });
-    return;
-  }
-  if (!validateEmail(email)) {
-    res.status(400);
-    res.json({ error: 'Please provide a valid email' });
     return;
   }
   const userName = await getUserForEmail(email);
@@ -102,9 +103,11 @@ app.get('/user', async (req, res) => {
 
 app.post('/user', async (req, res) => {
   const user = req.body;
-  const token = req.headers.authorization.replace(/^(Bearer )/, '');
-  if (!verifyEmail(user.email, token)) {
+  const token = (req.headers.authorization || '').replace(/^(Bearer )/, '');
+  const emailVerified = await verifyEmail(user.email, token);
+  if (!emailVerified) {
     res.status(403);
+    res.json({ error: 'Invalid token for request' });
     return;
   }
   if (!user.userName) {
@@ -115,11 +118,6 @@ app.post('/user', async (req, res) => {
   if (!user.email) {
     res.status(400);
     res.json({ error: 'You must provide an email adress' });
-    return;
-  }
-  if (!validateEmail(user.email)) {
-    res.status(400);
-    res.json({ error: 'Please provide a valid email' });
     return;
   }
   try {
