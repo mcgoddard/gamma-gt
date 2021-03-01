@@ -1,4 +1,4 @@
-import React, { useState, useContext } from 'react';
+import React, { useState, useContext, useEffect } from 'react';
 import UserContext from '../utils/UserContext';
 import { getUserForEmail, setUserForEmail } from '../utils/api';
 
@@ -16,16 +16,18 @@ const Profile = () => {
     }
   };
 
-  getUserForEmail(user.email, user.token).then((result) => {
-    if (result && result.userName) {
-      setUser({
-        ...user,
-        userName: result.userName,
-      });
-    } else {
-      setStage('userName');
-    }
-  });
+  useEffect(() => {
+    getUserForEmail(user.email, user.token).then((result) => {
+      if (result && result.userName) {
+        setUser({
+          ...user,
+          userName: result.userName,
+        });
+      } else {
+        setStage('userName');
+      }
+    });
+  }, []);
 
   const confirm = async (event) => {
     event.preventDefault();
