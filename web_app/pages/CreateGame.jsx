@@ -6,6 +6,8 @@ import AddGamePlayer from '../components/AddGamePlayer';
 import { addGame, getPlayerNames } from '../utils/api';
 import UserContext from '../utils/UserContext';
 
+const numeric = /^[0-9.]+$/;
+
 const CreateGame = withRouter(({ history }) => {
   const [user] = useContext(UserContext);
   const [playerNames, setPlayerNames] = useState([]);
@@ -32,7 +34,7 @@ const CreateGame = withRouter(({ history }) => {
     if (players.length < 2) {
       newErrors.push('You must have at least 2 players.');
     }
-    if (gameTime <= 0 || gameTime > 1440) {
+    if (gameTime < 1 || gameTime > 1440) {
       newErrors.push('Game time must be between 1 and 1440 minutes.');
     }
     if (name === '') {
@@ -64,7 +66,9 @@ const CreateGame = withRouter(({ history }) => {
     }
   };
   const changeGameTime = (event) => {
-    setGameTime(event.target.value);
+    if (event.target.value.match(numeric)) {
+      setGameTime(event.target.value);
+    }
   };
   const changeGameName = (_event, { newValue }) => {
     if (typeof newValue === 'string') {
@@ -133,7 +137,7 @@ const CreateGame = withRouter(({ history }) => {
         <div>
           <label htmlFor="gameTime">
             <p>Game time:</p>
-            <input type="number" value={gameTime} onChange={changeGameTime} min="0" max="1440" />
+            <input type="number" value={gameTime} onChange={changeGameTime} min="0" max="1440" step="any" />
           </label>
         </div>
         <p>Players</p>

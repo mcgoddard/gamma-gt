@@ -81,7 +81,7 @@ app.post('/player/:playerName/games', async (req, res) => {
     res.json({ error: 'Player is not in the game' });
     return;
   }
-  const parsedTime = Number.parseInt(game.gameTime, 10);
+  const parsedTime = Number.parseFloat(game.gameTime, 10);
   if (Number.isNaN(parsedTime)) {
     res.status(400);
     res.json({ error: 'Game time must be a valid integer' });
