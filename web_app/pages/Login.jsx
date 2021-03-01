@@ -50,7 +50,7 @@ const Profile = () => {
     <form onSubmit={confirm}>
       {stage === 'userName' && (
         <>
-          <h1>Username</h1>
+          <h1>Create username</h1>
           {error && (
             <p className="error">{error}</p>
           )}

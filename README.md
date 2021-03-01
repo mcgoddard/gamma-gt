@@ -17,3 +17,5 @@ If you are deploying to your own domain you will need to set the `BASE_URL` envi
 Build the app by running `npm run build` from inside the `web_app` directory.
 
 Deploy everything by running `serverless deploy` from inside the `api` directory with the correct AWS profile selected.
+
+Currently Route53 records and CloudFront distribution are not managed by IaC and need to be created manually.

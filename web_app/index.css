@@ -71,3 +71,20 @@ th {
 td {
     padding: 10px;
 }
+
+.react-autosuggest__suggestions-list {
+    list-style: none;
+}
+
+.win-controls {
+    margin: 10px;
+}
+
+.win-controls input {
+    margin-top: 0px;
+    margin-bottom: 0px;
+}
+
+.error {
+    color: yellow;
+}

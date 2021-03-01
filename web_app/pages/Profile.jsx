@@ -17,6 +17,9 @@ const Profile = () => {
     <>
       <h1>{userName}</h1>
       <h2>Games</h2>
+      <Link to="/create_game" className="button">
+        Add game
+      </Link>
       {loadedGames && (
       <table>
         <thead>
@@ -45,9 +48,6 @@ const Profile = () => {
       {!loadedGames && (
         <p>Loading...</p>
       )}
-      <Link to="/create_game" className="button">
-        Add game
-      </Link>
     </>
   );
 };

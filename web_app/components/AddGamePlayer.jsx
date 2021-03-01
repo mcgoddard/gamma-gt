@@ -44,11 +44,13 @@ const AddGamePlayer = ({
         renderSuggestion={renderSuggestion}
         inputProps={inputProps}
       />
-      Win?
-      <input type="checkbox" value={player.winner} onChange={changePlayerWinner} />
-      {player.editable && (
-        <input className="button" type="submit" onClick={removeRow} value="-" />
-      )}
+      <div className="win-controls">
+        Win?
+        <input type="checkbox" value={player.winner} onChange={changePlayerWinner} />
+        {player.editable && (
+          <input className="button" type="submit" onClick={removeRow} value="-" />
+        )}
+      </div>
     </div>
   );
 };
