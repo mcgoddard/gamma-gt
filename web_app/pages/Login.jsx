@@ -2,6 +2,8 @@ import React, { useState, useContext } from 'react';
 import UserContext from '../utils/UserContext';
 import { getUserForEmail, setUserForEmail } from '../utils/api';
 
+const alphanumeric = /^[0-9a-zA-Z]+$/;
+
 const Profile = () => {
   const [user, setUser] = useContext(UserContext);
   const [stage, setStage] = useState('loading');
@@ -9,7 +11,9 @@ const Profile = () => {
   const [error, setError] = useState(null);
 
   const userNameChange = (event) => {
-    setUserName(event.target.value);
+    if (event.target.value.match(alphanumeric)) {
+      setUserName(event.target.value);
+    }
   };
 
   getUserForEmail(user.email, user.token).then((result) => {

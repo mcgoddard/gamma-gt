@@ -5,6 +5,8 @@ const { verifyEmail, googleAuth } = require('./auth');
 const app = express();
 const port = 3000;
 
+const alphanumeric = /^[0-9a-zA-Z]+$/;
+
 app.use(cors({
   origin: '*',
   optionsSuccessStatus: 200,
@@ -67,6 +69,11 @@ app.post('/player/:playerName/games', async (req, res) => {
     res.json({ error: 'Invalid token for request' });
     return;
   }
+  if (!user.allowListed) {
+    res.status(403);
+    res.json({ error: 'Your account is not currently approved, please message Mike to be verified' });
+    return;
+  }
   const game = req.body;
   game.timePlayed = new Date().toISOString();
   if (!game.players.some((player) => player.name === playerName)) {
@@ -116,9 +123,9 @@ app.post('/user', async (req, res) => {
     res.json({ error: 'Invalid token for request' });
     return;
   }
-  if (!user.userName) {
+  if (!user.userName || !user.userName.match(alphanumeric)) {
     res.status(400);
-    res.json({ error: 'You must provide a username' });
+    res.json({ error: 'You must provide a valid username' });
     return;
   }
   if (!user.email) {

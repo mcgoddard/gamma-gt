@@ -171,6 +171,7 @@ const setUserForEmail = async ({ userName, email }) => {
           Item: {
             playerName: email,
             sortKey: userName,
+            allowListed: false,
           },
           ConditionExpression: 'attribute_not_exists(playerName)',
         },

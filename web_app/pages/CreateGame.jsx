@@ -51,8 +51,14 @@ const CreateGame = withRouter(({ history }) => {
         players,
       }, user.token).then(() => {
         history.push(`/profile/${user.userName}`);
-      }).catch(() => {
-        setErrors(['Something went wrong!']);
+      }).catch((error) => {
+        const messages = [];
+        if (error?.response?.data?.error) {
+          messages.push(error.response.data.error);
+        } else {
+          messages.push('Something went wrong!');
+        }
+        setErrors(messages);
         setSubmitting(false);
       });
     }
@@ -105,7 +111,7 @@ const CreateGame = withRouter(({ history }) => {
       <p>Fill out the form to add a game to the tracker.</p>
       <p>You can add any game that you&apos;ve played with at least one other user of this site.</p>
       <p>
-        &quot;Game time&quot; should be the play time listed on the box.
+        &quot;Game time&quot; should be the play time listed on the box (in minutes).
         If a range is given average those times.
         If no time is given take the average from Board Game Geek.
       </p>
