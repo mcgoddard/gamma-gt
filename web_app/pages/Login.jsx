@@ -62,7 +62,7 @@ const Profile = () => {
           )}
           <input type="text" name="userName" value={userName} onChange={userNameChange} />
           <input type="submit" value="Submit" disabled={!userName} />
-          <p>Once you've created your account contact Mike to verify your email</p>
+          <p>Once you&quot;ve created your account contact Mike to verify your email</p>
         </>
       )}
     </form>
