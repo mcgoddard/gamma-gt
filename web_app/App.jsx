@@ -9,6 +9,7 @@ import Leaderboard from './pages/Leaderboard';
 import Profile from './pages/Profile';
 import Login from './pages/Login';
 import SignIn from './pages/SignIn';
+import Confest from './pages/Confest';
 import Navbar from './components/Navbar';
 import UserContext from './utils/UserContext';
 
@@ -31,6 +32,9 @@ const App = () => {
             </Route>
             <Route path="/create_game">
               <CreateGame />
+            </Route>
+            <Route path="/confest-2021">
+              <Confest />
             </Route>
             <Route path="/">
               <Leaderboard />

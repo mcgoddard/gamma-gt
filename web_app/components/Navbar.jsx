@@ -12,6 +12,9 @@ const Navbar = () => {
       </div>
       { user && (
         <div id="navbar-buttons">
+          <Link to="/confest-2021">
+            Confest!
+          </Link>
           <Link to="/">
             Leaderboard
           </Link>

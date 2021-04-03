@@ -41,4 +41,20 @@ export const setUserForEmail = async (user, token) => {
 export const getPlayerNames = async () => {
   const response = await Axios.get(`${BASE_URL}/players`);
   return response.data;
-}
+};
+
+export const getConfest = async () => {
+  const response = await Axios.get(`${BASE_URL}/confest-2021`);
+  const playerObjects = [];
+  // eslint-disable-next-line no-restricted-syntax
+  for (const [key, value] of Object.entries(response.data)) {
+    playerObjects.push({
+      ...value,
+      playerName: key,
+    });
+  }
+  const scorers = [...playerObjects].sort((a, b) => b.score - a.score);
+  const played = [...playerObjects].sort((a, b) => b.played - a.played);
+  const won = [...playerObjects].sort((a, b) => b.won - a.won);
+  return { scorers, played, won };
+};

@@ -1,3 +1,4 @@
+/* eslint-disable guard-for-in */
 const express = require('express');
 const cors = require('cors');
 const { verifyEmail, googleAuth } = require('./auth');
@@ -94,6 +95,44 @@ app.post('/player/:playerName/games', async (req, res) => {
   game.gameTime = parsedTime;
   await addGame(game);
   res.sendStatus(200);
+});
+
+app.get('/confest-2021', async (req, res) => {
+  const playerNames = await getPlayerNames();
+  const gamePromises = playerNames.map((player) => getGamesForPlayer(player));
+  const games = (await Promise.all(gamePromises)).reduce((acc, cur) => {
+    acc.push(...cur);
+    return acc;
+  }, []);
+  const filtered = games.filter((game) => game.timePlayed.startsWith('2021-04-03') || game.timePlayed.startsWith('2021-04-04'));
+  const deduped = filtered.reduce((acc, cur) => {
+    if (!(cur.timePlayed in acc)) {
+      acc[cur.timePlayed] = cur;
+    }
+    return acc;
+  }, {});
+  const scoreboard = {};
+  // eslint-disable-next-line no-restricted-syntax
+  for (const item in deduped) {
+    const cur = deduped[item];
+    // eslint-disable-next-line no-restricted-syntax
+    cur.players.forEach((player) => {
+      if (player.name in scoreboard) {
+        scoreboard[player.name].played += 1;
+        if (player.winner) {
+          scoreboard[player.name].won += 1;
+          scoreboard[player.name].score += cur.gameTime;
+        }
+      } else {
+        scoreboard[player.name] = {
+          played: 1,
+          won: player.winner ? 1 : 0,
+          score: player.winner ? cur.gameTime : 0,
+        };
+      }
+    });
+  }
+  res.json(scoreboard);
 });
 
 app.get('/user', async (req, res) => {
