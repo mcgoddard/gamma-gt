@@ -8,10 +8,12 @@ const port = 3000;
 
 const alphanumeric = /^[0-9a-zA-Z]+$/;
 
-app.use(cors({
-  origin: '*',
-  optionsSuccessStatus: 200,
-}));
+app.use(
+  cors({
+    origin: '*',
+    optionsSuccessStatus: 200,
+  }),
+);
 app.use(express.json());
 
 const {
@@ -24,27 +26,60 @@ const {
   setUserForEmail,
   getPlayerNames,
 } = require('./dynamodb');
+const { TOP_SCORERS, MOST_GAMES_PLAYED, GAMES, USER, CONFEST } = require('./fixtures');
+
+const wrapLocalFixtures = async (toWrap, toReturn, res) => {
+  if (process.env.NODE_ENV === 'local') {
+    res.json(toReturn);
+  } else {
+    await toWrap();
+  }
+};
 
 app.get('/top_scorers', async (req, res) => {
-  const scorers = await getTopScorers();
-  res.json(scorers);
+  wrapLocalFixtures(
+    async () => {
+      const scorers = await getTopScorers();
+      res.json(scorers);
+    },
+    TOP_SCORERS,
+    res,
+  );
 });
 
 app.get('/most_games_played', async (req, res) => {
-  const gamesPlayed = await getMostGamesPlayed();
-  res.json(gamesPlayed);
+  wrapLocalFixtures(
+    async () => {
+      const gamesPlayed = await getMostGamesPlayed();
+      res.json(gamesPlayed);
+    },
+    MOST_GAMES_PLAYED,
+    res,
+  );
 });
 
 app.get('/player/:playerName/games', async (req, res) => {
-  const { playerName } = req.params;
-  const games = await getGamesForPlayer(playerName);
-  res.json(games);
+  wrapLocalFixtures(
+    async () => {
+      const { playerName } = req.params;
+      const games = await getGamesForPlayer(playerName);
+      res.json(games);
+    },
+    GAMES,
+    res,
+  );
 });
 
 app.get('/player/:playerName/profile', async (req, res) => {
-  const { playerName } = req.params;
-  const profile = await getProfile(playerName);
-  res.json(profile);
+  wrapLocalFixtures(
+    async () => {
+      const { playerName } = req.params;
+      const profile = await getProfile(playerName);
+      res.json(profile);
+    },
+    GAMES,
+    res,
+  );
 });
 
 app.get('/players', async (req, res) => {
@@ -53,132 +88,146 @@ app.get('/players', async (req, res) => {
 });
 
 app.post('/player/:playerName/games', async (req, res) => {
-  const token = (req.headers.authorization || '').replace(/^(Bearer )/, '');
-  let tokenEmail = '';
-  try {
-    tokenEmail = await googleAuth(token);
-  } catch (error) {
-    console.log(error);
-    res.status(403);
-    res.json({ error: 'Invalid token for request' });
-    return;
-  }
-  const user = await getUserForEmail(tokenEmail);
-  const { playerName } = req.params;
-  if (user.userName !== playerName) {
-    res.status(403);
-    res.json({ error: 'Invalid token for request' });
-    return;
-  }
-  if (!user.allowListed) {
-    res.status(403);
-    res.json({ error: 'Your account is not currently approved, please message Mike to be verified' });
-    return;
-  }
-  const game = req.body;
-  game.timePlayed = new Date().toISOString();
-  if (!game.players.some((player) => player.name === playerName)) {
-    res.status(400);
-    res.json({ error: 'Player is not in the game' });
-    return;
-  }
-  const parsedTime = Number.parseFloat(game.gameTime, 10);
-  if (Number.isNaN(parsedTime)) {
-    res.status(400);
-    res.json({ error: 'Game time must be a valid integer' });
-  }
-  if (parsedTime < 0 || parsedTime > 1440) {
-    res.status(400);
-    res.json({ error: 'Game time must be between 0 and 1440 minutes' });
-    return;
-  }
-  game.gameTime = parsedTime;
-  await addGame(game);
-  res.sendStatus(200);
+  wrapLocalFixtures(async () => {
+    const token = (req.headers.authorization || '').replace(/^(Bearer )/, '');
+    let tokenEmail = '';
+    try {
+      tokenEmail = await googleAuth(token);
+    } catch (error) {
+      console.log(error);
+      res.status(403);
+      res.json({ error: 'Invalid token for request' });
+      return;
+    }
+    const user = await getUserForEmail(tokenEmail);
+    const { playerName } = req.params;
+    if (user.userName !== playerName) {
+      res.status(403);
+      res.json({ error: 'Invalid token for request' });
+      return;
+    }
+    if (!user.allowListed) {
+      res.status(403);
+      res.json({
+        error:
+          'Your account is not currently approved, please message Mike to be verified',
+      });
+      return;
+    }
+    const game = req.body;
+    game.timePlayed = new Date().toISOString();
+    if (!game.players.some((player) => player.name === playerName)) {
+      res.status(400);
+      res.json({ error: 'Player is not in the game' });
+      return;
+    }
+    const parsedTime = Number.parseFloat(game.gameTime, 10);
+    if (Number.isNaN(parsedTime)) {
+      res.status(400);
+      res.json({ error: 'Game time must be a valid integer' });
+    }
+    if (parsedTime < 0 || parsedTime > 1440) {
+      res.status(400);
+      res.json({ error: 'Game time must be between 0 and 1440 minutes' });
+      return;
+    }
+    game.gameTime = parsedTime;
+    await addGame(game);
+    res.sendStatus(200);
+  }, GAMES, res);
 });
 
 app.get('/confest-2021', async (req, res) => {
-  const playerNames = await getPlayerNames();
-  const gamePromises = playerNames.map((player) => getGamesForPlayer(player));
-  const games = (await Promise.all(gamePromises)).reduce((acc, cur) => {
-    acc.push(...cur);
-    return acc;
-  }, []);
-  const filtered = games.filter((game) => game.timePlayed.startsWith('2021-04-03') || game.timePlayed.startsWith('2021-04-04'));
-  const deduped = filtered.reduce((acc, cur) => {
-    if (!(cur.timePlayed in acc)) {
-      acc[cur.timePlayed] = cur;
-    }
-    return acc;
-  }, {});
-  const scoreboard = {};
-  // eslint-disable-next-line no-restricted-syntax
-  for (const item in deduped) {
-    const cur = deduped[item];
-    // eslint-disable-next-line no-restricted-syntax
-    cur.players.forEach((player) => {
-      if (player.name in scoreboard) {
-        scoreboard[player.name].played += 1;
-        if (player.winner) {
-          scoreboard[player.name].won += 1;
-          scoreboard[player.name].score += cur.gameTime;
-        }
-      } else {
-        scoreboard[player.name] = {
-          played: 1,
-          won: player.winner ? 1 : 0,
-          score: player.winner ? cur.gameTime : 0,
-        };
+  wrapLocalFixtures(async () => {
+    const playerNames = await getPlayerNames();
+    const gamePromises = playerNames.map((player) => getGamesForPlayer(player));
+    const games = (await Promise.all(gamePromises)).reduce((acc, cur) => {
+      acc.push(...cur);
+      return acc;
+    }, []);
+    const filtered = games.filter(
+      (game) => game.timePlayed.startsWith('2021-04-03')
+        || game.timePlayed.startsWith('2021-04-04'),
+    );
+    const deduped = filtered.reduce((acc, cur) => {
+      if (!(cur.timePlayed in acc)) {
+        acc[cur.timePlayed] = cur;
       }
-    });
-  }
-  res.json(scoreboard);
+      return acc;
+    }, {});
+    const scoreboard = {};
+    // eslint-disable-next-line no-restricted-syntax
+    for (const item in deduped) {
+      const cur = deduped[item];
+      // eslint-disable-next-line no-restricted-syntax
+      cur.players.forEach((player) => {
+        if (player.name in scoreboard) {
+          scoreboard[player.name].played += 1;
+          if (player.winner) {
+            scoreboard[player.name].won += 1;
+            scoreboard[player.name].score += cur.gameTime;
+          }
+        } else {
+          scoreboard[player.name] = {
+            played: 1,
+            won: player.winner ? 1 : 0,
+            score: player.winner ? cur.gameTime : 0,
+          };
+        }
+      });
+    }
+    res.json(scoreboard);
+  }, CONFEST, res);
 });
 
 app.get('/user', async (req, res) => {
-  const email = req.query.email || null;
-  const token = (req.headers.authorization || '').replace(/^(Bearer )/, '');
-  const emailVerified = await verifyEmail(email, token);
-  if (!emailVerified) {
-    res.status(403);
-    res.json({ error: 'Invalid token for request' });
-    return;
-  }
-  if (!email) {
-    res.status(400);
-    res.json({ error: 'You must provide an email' });
-    return;
-  }
-  const userName = await getUserForEmail(email);
-  res.json(userName);
+  wrapLocalFixtures(async () => {
+    const email = req.query.email || null;
+    const token = (req.headers.authorization || '').replace(/^(Bearer )/, '');
+    const emailVerified = await verifyEmail(email, token);
+    if (!emailVerified) {
+      res.status(403);
+      res.json({ error: 'Invalid token for request' });
+      return;
+    }
+    if (!email) {
+      res.status(400);
+      res.json({ error: 'You must provide an email' });
+      return;
+    }
+    const userName = await getUserForEmail(email);
+    res.json(userName);
+  }, USER, res);
 });
 
 app.post('/user', async (req, res) => {
-  const user = req.body;
-  const token = (req.headers.authorization || '').replace(/^(Bearer )/, '');
-  const emailVerified = await verifyEmail(user.email, token);
-  if (!emailVerified) {
-    res.status(403);
-    res.json({ error: 'Invalid token for request' });
-    return;
-  }
-  if (!user.userName || !user.userName.match(alphanumeric)) {
-    res.status(400);
-    res.json({ error: 'You must provide a valid username' });
-    return;
-  }
-  if (!user.email) {
-    res.status(400);
-    res.json({ error: 'You must provide an email adress' });
-    return;
-  }
-  try {
-    await setUserForEmail(user);
-    res.sendStatus(200);
-  } catch (err) {
-    res.status(400);
-    res.json({ error: 'Username is already taken' });
-  }
+  wrapLocalFixtures(async () => {
+    const user = req.body;
+    const token = (req.headers.authorization || '').replace(/^(Bearer )/, '');
+    const emailVerified = await verifyEmail(user.email, token);
+    if (!emailVerified) {
+      res.status(403);
+      res.json({ error: 'Invalid token for request' });
+      return;
+    }
+    if (!user.userName || !user.userName.match(alphanumeric)) {
+      res.status(400);
+      res.json({ error: 'You must provide a valid username' });
+      return;
+    }
+    if (!user.email) {
+      res.status(400);
+      res.json({ error: 'You must provide an email adress' });
+      return;
+    }
+    try {
+      await setUserForEmail(user);
+      res.sendStatus(200);
+    } catch (err) {
+      res.status(400);
+      res.json({ error: 'Username is already taken' });
+    }
+  }, USER, res);
 });
 
 if (process.env.NODE_ENV !== 'test' && process.env.NODE_ENV !== 'prod') {
